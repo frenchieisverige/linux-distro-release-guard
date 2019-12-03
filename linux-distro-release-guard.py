@@ -4,18 +4,8 @@ import time
 import requests
 import argparse
 
+# Global variables
 url = 'https://distrowatch.com/news/torrents.xml'
-
-""" distro_to_watch = [
-    'debian',
-    'ubuntu',
-    'linuxmint',
-    'raspbian',
-    'clonezilla',
-    'openmediavault',
-    'FreeNAS',
-    'gparted',
-    ] """
 distro_to_watch = []
 last_modified = 'none'
 
@@ -24,7 +14,7 @@ def get_feed(url, l_m='none'):
         print('Get feed with no last_modified')
         return feedparser.parse(url)
     else:
-        print('Get feed with last_modified', l_m)
+        print("Get feed with last_modified %s" % l_m)
         return feedparser.parse(url, modified=l_m)
 
 
@@ -34,7 +24,7 @@ def search_distro(feed):
     for i in range(feed_length):
         for j in distro_to_watch:
             if j in feed.entries[i].title:
-                print("Add",feed.entries[i].title,"to download")
+                print("Add %s to download" % feed.entries[i].title)
                 disto_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
 
     return disto_list
@@ -47,7 +37,7 @@ def copy_to_watch_folder(torrentList):
 
 def check_updates():
     global last_modified
-    print('check_updates', last_modified)
+    print("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
     if feed.status == 304:
@@ -69,7 +59,6 @@ def read_wishing_list():
     file = open("./config/distro-list.txt", "r")
     for line in file:
         if line.startswith('#') or line in ['\n', '\r\n']:
-            print("Skipping")
             continue
         distro_to_watch.append(line.rstrip())
 
@@ -90,7 +79,7 @@ def main():
         update_rate = int(args.update_frequency)*3600
 
 
-    print('Starting application with update frequency:', update_rate)
+    print("Starting application with update frequency: %s seconds" % update_rate)
     while True:
         read_wishing_list()
         check_updates()
