@@ -1,7 +1,11 @@
 FROM python:3
 
-WORKDIR /usr/src/app
+# Environment and build variables‚
+ARG build_update_rate=3
+ENV update_rate=${build_update_rate}
 
+# Install libraries
+WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -9,6 +13,8 @@ WORKDIR /
 
 COPY . .
 
+# Create local torrents folder to be mapped with HOST
 RUN mkdir ./torrents
 
-CMD [ "python", "./auto-linux-watcher.py" ]
+# Start script
+CMD [ "sh", "-c", "python", "./linux-distro-release-guard.py" ]
