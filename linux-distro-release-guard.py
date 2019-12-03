@@ -2,6 +2,7 @@
 import feedparser
 import time
 import requests
+import argparse
 
 url = 'https://distrowatch.com/news/torrents.xml'
 
@@ -74,11 +75,26 @@ def read_wishing_list():
 
 
 def main():
-    print('Starting application with update frequency:')
+
+    update_rate = 3600
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--version", help="show version")
+    parser.add_argument("-u", "--update-frequency", help="how often the script should check new releases (in hours)")
+    args = parser.parse_args()
+
+    if args.version:
+        print("linux-distro-release-guard is in version 1.0")
+        exit(0)
+    if args.update_frequency:
+        update_rate = int(args.update_frequency)*3600
+
+
+    print('Starting application with update frequency:', update_rate)
     while True:
         read_wishing_list()
         check_updates()
-        time.sleep(2)
+        time.sleep(update_rate)
     
 # Main prog
 if __name__ == '__main__':
