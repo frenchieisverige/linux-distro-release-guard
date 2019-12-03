@@ -1,7 +1,7 @@
 FROM python:3
 
 # Environment and build variables‚
-ARG build_update_rate=3
+ARG build_update_rate=6
 ENV update_rate=${build_update_rate}
 
 # Install libraries
@@ -17,4 +17,4 @@ COPY . .
 RUN mkdir ./torrents
 
 # Start script
-CMD [ "sh", "-c", "python", "./linux-distro-release-guard.py" ]
+CMD [ "sh", "-c", "python", "./linux-distro-release-guard.py -u ${update_rate}" ]
