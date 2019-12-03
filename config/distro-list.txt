@@ -1,0 +1,14 @@
+###########################################################################
+#     * Write here down your wishing Linux distribution list.             #
+#     * Please check https://distrowatch.com/news/torrents.xml and        #
+#      check your distribution name in the torrent file name.             #
+#     * It is CASE SENSITIVE, so BE CAREFUL!                              #
+#     * One linux distribution per line                                   #
+#                                                                         #
+#      Example:                                                           #
+#      debian                                                             #
+#      openmediavault                                                     #
+#      FreeNAS                                                            #
+#                                                                         #
+###########################################################################
+
