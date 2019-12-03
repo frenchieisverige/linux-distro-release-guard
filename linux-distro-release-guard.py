@@ -5,7 +5,7 @@ import requests
 
 url = 'https://distrowatch.com/news/torrents.xml'
 
-distro_to_watch = [
+""" distro_to_watch = [
     'debian',
     'ubuntu',
     'linuxmint',
@@ -14,8 +14,8 @@ distro_to_watch = [
     'openmediavault',
     'FreeNAS',
     'gparted',
-    ]
-
+    ] """
+distro_to_watch = []
 last_modified = 'none'
 
 def get_feed(url, l_m='none'):
@@ -28,9 +28,9 @@ def get_feed(url, l_m='none'):
 
 
 def search_distro(feed):
-    array_length = len(feed.entries)
+    feed_length = len(feed.entries)
     disto_list = []
-    for i in range(array_length):
+    for i in range(feed_length):
         for j in distro_to_watch:
             if j in feed.entries[i].title:
                 print("Add",feed.entries[i].title,"to download")
@@ -55,24 +55,30 @@ def check_updates():
     if feed.status == 200:   
         routine(feed)
 
-
 def routine(feed):
     global last_modified
     last_modified = feed.modified
     torrents = search_distro(feed)
-    #copy_to_watch_folder(torrents)
+    copy_to_watch_folder(torrents)
 
-def read_update_frequency():
-    f = open("./config/config.txt", "r")
-    return int(f.readline())
+# rstrip removes /n lines
+def read_wishing_list():
+    global distro_to_watch
+    distro_to_watch = []
+    file = open("./config/distro-list.txt", "r")
+    for line in file:
+        if line.startswith('#') or line in ['\n', '\r\n']:
+            print("Skipping")
+            continue
+        distro_to_watch.append(line.rstrip())
 
 
 def main():
-    update_time = read_update_frequency()
-    print('Starting application with update frequency:', update_time)
+    print('Starting application with update frequency:')
     while True:
+        read_wishing_list()
         check_updates()
-        time.sleep(update_time)
+        time.sleep(2)
     
 # Main prog
 if __name__ == '__main__':
