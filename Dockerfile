@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.8-slim-buster
 
 # Environment and build variables‚
 ARG build_update_rate=6
