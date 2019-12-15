@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Standard Libraries
-import time
+from time import sleep
 import argparse
 import logging
 from shutil import copyfile
@@ -92,7 +92,7 @@ def main():
         read_wishing_list()
         check_updates()
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_rate)))
-        time.sleep(update_rate)
+        sleep(update_rate)
     
 # Main prog
 if __name__ == '__main__':
