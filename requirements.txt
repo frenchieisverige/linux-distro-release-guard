@@ -1,2 +1,2 @@
-feedparser
-requests
+feedparser>=5.2.0,<6.0
+requests>2.21
