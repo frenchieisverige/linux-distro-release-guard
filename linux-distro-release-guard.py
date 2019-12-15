@@ -1,8 +1,15 @@
 #!/usr/bin/python
-import feedparser
+
+# Standard Libraries
 import time
-import requests
 import argparse
+import logging
+from shutil import copyfile
+from datetime import datetime  
+from datetime import timedelta  
+# Libraries installed via pip
+import feedparser
+import requests
 
 # Global variables
 url = 'https://distrowatch.com/news/torrents.xml'
@@ -11,10 +18,10 @@ last_modified = 'none'
 
 def get_feed(url, l_m='none'):
     if l_m == 'none':
-        print('Get feed with no last_modified')
+        logging.info('Get feed with no last_modified')
         return feedparser.parse(url)
     else:
-        print("Get feed with last_modified %s" % l_m)
+        logging.info("Get feed with last_modified %s" % l_m)
         return feedparser.parse(url, modified=l_m)
 
 
@@ -24,7 +31,7 @@ def search_distro(feed):
     for i in range(feed_length):
         for j in distro_to_watch:
             if j in feed.entries[i].title:
-                print("Add %s to download" % feed.entries[i].title)
+                logging.info("Add %s to download" % feed.entries[i].title)
                 disto_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
 
     return disto_list
@@ -37,11 +44,11 @@ def copy_to_watch_folder(torrentList):
 
 def check_updates():
     global last_modified
-    print("Check new releases on %s" % last_modified)
+    logging.info("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
     if feed.status == 304:
-        print(feed.debug_message)
+        logging.info(feed.debug_message)
 
     if feed.status == 200:   
         routine(feed)
@@ -66,6 +73,7 @@ def read_wishing_list():
 def main():
 
     update_rate = 3600
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
     
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", help="show version")
@@ -77,12 +85,13 @@ def main():
         exit(0)
     if args.update_frequency:
         update_rate = int(args.update_frequency)*3600
-
-
-    print("Starting application with update frequency: %s seconds" % update_rate)
+    
+    # Start application
+    logging.info("Starting application with update frequency: %s seconds" % update_rate)
     while True:
         read_wishing_list()
         check_updates()
+        logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_rate)))
         time.sleep(update_rate)
     
 # Main prog
