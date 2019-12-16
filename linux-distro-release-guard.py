@@ -13,7 +13,6 @@ import requests
 
 # Global variables
 url = 'https://distrowatch.com/news/torrents.xml'
-distro_to_watch = []
 last_modified = 'none'
 
 def get_feed(url, l_m='none'):
@@ -25,16 +24,16 @@ def get_feed(url, l_m='none'):
         return feedparser.parse(url, modified=l_m)
 
 
-def search_distro(feed):
+def search_distro(feed, wishing_list):
     feed_length = len(feed.entries)
-    disto_list = []
+    distro_list = []
     for i in range(feed_length):
-        for j in distro_to_watch:
+        for j in wishing_list:
             if j in feed.entries[i].title:
                 logging.info("Add %s to download" % feed.entries[i].title)
-                disto_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
+                distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
 
-    return disto_list
+    return distro_list
 
 def copy_to_watch_folder(torrentList):
     for j in torrentList:
@@ -56,18 +55,20 @@ def check_updates():
 def routine(feed):
     global last_modified
     last_modified = feed.modified
-    torrents = search_distro(feed)
+
+    wishing_list = read_wishing_list()
+    torrents = search_distro(feed, wishing_list)
     copy_to_watch_folder(torrents)
 
 # rstrip removes /n lines
 def read_wishing_list():
-    global distro_to_watch
     distro_to_watch = []
     file = open("./config/distro-list.txt", "r")
     for line in file:
         if line.startswith('#') or line in ['\n', '\r\n']:
             continue
         distro_to_watch.append(line.rstrip())
+    return distro_to_watch
 
 def read_arg_parameters():
     parser = argparse.ArgumentParser()
@@ -87,7 +88,6 @@ def main():
     # Start application
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     while True:
-        read_wishing_list()
         check_updates()
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
         sleep(update_frequency)
