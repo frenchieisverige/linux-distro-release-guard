@@ -69,30 +69,28 @@ def read_wishing_list():
             continue
         distro_to_watch.append(line.rstrip())
 
-
-def main():
-
-    update_rate = 3600
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
-    
+def read_arg_parameters():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", help="show version")
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 1.0')
     parser.add_argument("-u", "--update-frequency", help="how often the script should check new releases (in hours)")
     args = parser.parse_args()
 
-    if args.version:
-        print("linux-distro-release-guard is in version 1.0")
-        exit(0)
     if args.update_frequency:
-        update_rate = int(args.update_frequency)*3600
+        return int(args.update_frequency)*3600
+
+def main():
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
+
+    update_frequency = read_arg_parameters()
     
     # Start application
-    logging.info("Starting application with update frequency: %s seconds" % update_rate)
+    logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     while True:
         read_wishing_list()
         check_updates()
-        logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_rate)))
-        sleep(update_rate)
+        logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
+        sleep(update_frequency)
     
 # Main prog
 if __name__ == '__main__':
