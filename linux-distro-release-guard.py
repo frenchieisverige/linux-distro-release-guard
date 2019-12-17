@@ -1,18 +1,17 @@
 #!/usr/bin/python
 
 # Standard Libraries
-from time import sleep
 import argparse
 import logging
+import configparser
 from shutil import copyfile
 from datetime import datetime  
-from datetime import timedelta  
+from datetime import timedelta
+from time import sleep  
 # Libraries installed via pip
 import feedparser
 import requests
 
-# Global variables
-url = 'https://distrowatch.com/news/torrents.xml'
 
 def get_feed(url, l_m='none'):
     if l_m == 'none':
@@ -24,24 +23,21 @@ def get_feed(url, l_m='none'):
 
 
 def search_distro(feed, wishing_list):
-    feed_length = len(feed.entries)
     distro_list = []
-    for i in range(feed_length):
+    for i in range(len(feed.entries)):
         for j in wishing_list:
             if j in feed.entries[i].title:
-                logging.info("Add %s to download" % feed.entries[i].title)
                 distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
-
     return distro_list
 
-def copy_to_watch_folder(torrentList):
+def copy_to_watch_folder(torrentList, watchDir):
     for j in torrentList:
         myfile = requests.get(j.get("link"), allow_redirects=True)
-        path = './torrents/' + j.get("name")
-        open(path, 'wb').write(myfile.content) 
+        path = watchDir + j.get("name")
+        open(path, 'wb').write(myfile.content)
+        logging.info("Add %s to download" % j.get("name")) 
 
-def check_updates(last_modified):
-
+def check_updates(url,last_modified):
     logging.info("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
@@ -53,10 +49,10 @@ def check_updates(last_modified):
     #    routine(feed)
     return feed
 
-def routine(feed):
+def routine(feed, watchDir):
     wishing_list = read_wishing_list()
     torrents = search_distro(feed, wishing_list)
-    copy_to_watch_folder(torrents)
+    copy_to_watch_folder(torrents, watchDir)
 
 # rstrip removes /n lines
 def read_wishing_list():
@@ -77,19 +73,29 @@ def read_arg_parameters():
     if args.update_frequency:
         return int(args.update_frequency)*3600
 
+def read_config_ini():
+    config = configparser.ConfigParser()
+    config.read('./config/config.ini')
+    
+    url = config['distrowatch.com']['url']
+    watchDir = config['bitTorrentClient']['watchDir']
+
+    return url, watchDir
+
 def main():
 
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
 
     update_frequency = read_arg_parameters()
     last_modified = 'none'
+    url, watchDir = read_config_ini()
 
     # Start application
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     while True:
-        distro_feed = check_updates(last_modified)
+        distro_feed = check_updates(url,last_modified)
         last_modified = distro_feed.modified
-        routine(distro_feed)
+        routine(distro_feed, watchDir)
 
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
         sleep(update_frequency)
