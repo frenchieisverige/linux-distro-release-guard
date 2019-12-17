@@ -13,7 +13,6 @@ import requests
 
 # Global variables
 url = 'https://distrowatch.com/news/torrents.xml'
-last_modified = 'none'
 
 def get_feed(url, l_m='none'):
     if l_m == 'none':
@@ -41,21 +40,20 @@ def copy_to_watch_folder(torrentList):
         path = './torrents/' + j.get("name")
         open(path, 'wb').write(myfile.content) 
 
-def check_updates():
-    global last_modified
+def check_updates(last_modified):
+
     logging.info("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
     if feed.status == 304:
         logging.info(feed.debug_message)
+        return
 
-    if feed.status == 200:   
-        routine(feed)
+    #if feed.status == 200:   
+    #    routine(feed)
+    return feed
 
 def routine(feed):
-    global last_modified
-    last_modified = feed.modified
-
     wishing_list = read_wishing_list()
     torrents = search_distro(feed, wishing_list)
     copy_to_watch_folder(torrents)
@@ -84,11 +82,15 @@ def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
 
     update_frequency = read_arg_parameters()
-    
+    last_modified = 'none'
+
     # Start application
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     while True:
-        check_updates()
+        distro_feed = check_updates(last_modified)
+        last_modified = distro_feed.modified
+        routine(distro_feed)
+
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
         sleep(update_frequency)
     
