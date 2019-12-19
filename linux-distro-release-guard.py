@@ -41,13 +41,20 @@ def check_updates(url,last_modified):
     logging.info("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
-    if feed.status == 304:
+    if feed.status == 200:   
+        return feed
+    else if feed.status == 301:
+        logging.warning("Redirected premanently to %s" %feed.href)
+        return
+    else if feed.status == 304:
         logging.info(feed.debug_message)
         return
-
-    #if feed.status == 200:   
-    #    routine(feed)
-    return feed
+    else if feed.status == 401:
+        logging.error("Feed does not exist anymore")
+        exit(1)
+    else
+        logging.warning("Feed does not exist anymore")
+    
 
 def routine(feed, watchDir):
     wishing_list = read_wishing_list()
