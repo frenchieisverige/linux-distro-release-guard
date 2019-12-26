@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
+############################## Imports ###################################
 # Standard Libraries
 import argparse
 import logging
-import configparser
+import json  
 from shutil import copyfile
 from datetime import datetime  
 from datetime import timedelta
 from time import sleep
-import json  
 # Libraries installed via pip
 import feedparser
 import requests
@@ -104,7 +104,6 @@ def read_config():
     url = config['url']
     watchDir = config['watchDir']
     return url, watchDir
-
 
 
 ################################# MAIN ###################################
