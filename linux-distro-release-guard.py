@@ -21,7 +21,7 @@ def get_feed(url, l_m='none'):
         logging.info("Get xml feed with last_modified %s" % l_m)
         return feedparser.parse(url, modified=l_m)
 
-def check_updates(url,last_modified):
+def check_updates(url, last_modified):
     logging.info("Check new releases on %s" % last_modified)
     feed = get_feed(url, l_m=last_modified)
 
@@ -44,11 +44,8 @@ def check_updates(url,last_modified):
 def search_distro(feed, wishing_list):
     distro_list = []
     for i in range(len(feed.entries)):
-        for j in wishing_list:
-            if isinstance(j, str):
-                if j in feed.entries[i].title:
-                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
-            elif isinstance(j, list):
+        for j in wishing_list:  
+            if isinstance(j, list):
                 if all(s in feed.entries[i].title for s in j):
                     distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
     return distro_list
@@ -63,7 +60,7 @@ def read_wishing_list():
         elif line.startswith('#') or line in ['\n', '\r\n']:
             continue
         else:
-            distro_to_watch.append(line.rstrip())
+            distro_to_watch.append([line.rstrip()])
     return distro_to_watch
 
 
@@ -75,8 +72,7 @@ def add_to_watch_folder(torrentList, watchDir):
         open(path, 'wb').write(myfile.content)
         logging.info("Add %s to download" % j.get("name")) 
 
-def routine(feed, watchDir):
-    wishing_list = read_wishing_list()
+def routine(feed, wishing_list, watchDir):
     torrents = search_distro(feed, wishing_list)
     add_to_watch_folder(torrents, watchDir)
 
@@ -111,11 +107,13 @@ def main():
     url, watchDir = read_config_ini()
     
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
+    
     while True:
         distro_feed = check_updates(url,last_modified)
+        wishing_list = read_wishing_list()
+        routine(distro_feed, wishing_list, watchDir)
+        # Update last_modified
         last_modified = distro_feed.modified
-        routine(distro_feed, watchDir)
-
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
         sleep(update_frequency)
     
