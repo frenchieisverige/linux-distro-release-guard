@@ -4,11 +4,14 @@
 #      check your distribution name in the torrent file name.             #
 #     * It is CASE SENSITIVE, so BE CAREFUL!                              #
 #     * One linux distribution per line                                   #
+#     * Supports also linux flavour (separated with - ):                  #
+#           distribution_name-flavour_name                                #
 #                                                                         #
-#      Example:                                                           #
-#      debian                                                             #
+#      Examples:                                                          #
 #      openmediavault                                                     #
+#      debian-gnome                                                       #
 #      FreeNAS                                                            #
+#      linuxmint-mate                                                     #
 #                                                                         #
 ###########################################################################
 
