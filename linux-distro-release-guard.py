@@ -43,16 +43,16 @@ def check_updates(url,last_modified):
 
     if feed.status == 200:   
         return feed
-    else if feed.status == 301:
+    elif feed.status == 301:
         logging.warning("Redirected premanently to %s" %feed.href)
         return
-    else if feed.status == 304:
+    elif feed.status == 304:
         logging.info(feed.debug_message)
         return
-    else if feed.status == 401:
+    elif feed.status == 401:
         logging.error("Feed does not exist anymore")
         exit(1)
-    else
+    else:
         logging.warning("Feed does not exist anymore")
     
 
@@ -66,9 +66,14 @@ def read_wishing_list():
     distro_to_watch = []
     file = open("./config/distro-list.txt", "r")
     for line in file:
-        if line.startswith('#') or line in ['\n', '\r\n']:
+        if "-" in line:
+            distro_to_watch.append(line.rstrip().split("-"))
+        elif line.startswith('#') or line in ['\n', '\r\n']:
             continue
-        distro_to_watch.append(line.rstrip())
+        else:
+            # distro_to_watch.append(line.rstrip()) 
+            print("not working")
+        
     return distro_to_watch
 
 def read_arg_parameters():
