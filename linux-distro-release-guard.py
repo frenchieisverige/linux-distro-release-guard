@@ -29,7 +29,7 @@ def search_distro(feed, wishing_list):
             if isinstance(j, str):
                 if j in feed.entries[i].title:
                     distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
-            elif isinstance(j, str):
+            elif isinstance(j, list):
                 if all(s in feed.entries[i].title for s in j):
                     distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
     return distro_list
