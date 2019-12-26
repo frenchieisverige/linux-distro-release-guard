@@ -26,8 +26,12 @@ def search_distro(feed, wishing_list):
     distro_list = []
     for i in range(len(feed.entries)):
         for j in wishing_list:
-            if j in feed.entries[i].title:
-                distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
+            if isinstance(j, str):
+                if j in feed.entries[i].title:
+                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
+            elif isinstance(j, str):
+                if all(s in feed.entries[i].title for s in j):
+                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
     return distro_list
 
 def copy_to_watch_folder(torrentList, watchDir):
@@ -71,9 +75,7 @@ def read_wishing_list():
         elif line.startswith('#') or line in ['\n', '\r\n']:
             continue
         else:
-            # distro_to_watch.append(line.rstrip()) 
-            print("not working")
-        
+            distro_to_watch.append(line.rstrip())
     return distro_to_watch
 
 def read_arg_parameters():
