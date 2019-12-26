@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Standard Libraries
 import argparse
@@ -12,34 +12,14 @@ from time import sleep
 import feedparser
 import requests
 
-
+############################## XML Feed ##################################
 def get_feed(url, l_m='none'):
     if l_m == 'none':
-        logging.info('Get feed with no last_modified')
+        logging.info('Get xml feed with no last_modified')
         return feedparser.parse(url)
     else:
-        logging.info("Get feed with last_modified %s" % l_m)
+        logging.info("Get xml feed with last_modified %s" % l_m)
         return feedparser.parse(url, modified=l_m)
-
-
-def search_distro(feed, wishing_list):
-    distro_list = []
-    for i in range(len(feed.entries)):
-        for j in wishing_list:
-            if isinstance(j, str):
-                if j in feed.entries[i].title:
-                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
-            elif isinstance(j, list):
-                if all(s in feed.entries[i].title for s in j):
-                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
-    return distro_list
-
-def copy_to_watch_folder(torrentList, watchDir):
-    for j in torrentList:
-        myfile = requests.get(j.get("link"), allow_redirects=True)
-        path = watchDir + j.get("name")
-        open(path, 'wb').write(myfile.content)
-        logging.info("Add %s to download" % j.get("name")) 
 
 def check_updates(url,last_modified):
     logging.info("Check new releases on %s" % last_modified)
@@ -58,12 +38,20 @@ def check_updates(url,last_modified):
         exit(1)
     else:
         logging.warning("Feed does not exist anymore")
-    
 
-def routine(feed, watchDir):
-    wishing_list = read_wishing_list()
-    torrents = search_distro(feed, wishing_list)
-    copy_to_watch_folder(torrents, watchDir)
+
+############################# Distribution ###############################
+def search_distro(feed, wishing_list):
+    distro_list = []
+    for i in range(len(feed.entries)):
+        for j in wishing_list:
+            if isinstance(j, str):
+                if j in feed.entries[i].title:
+                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
+            elif isinstance(j, list):
+                if all(s in feed.entries[i].title for s in j):
+                    distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
+    return distro_list
 
 # rstrip removes /n lines
 def read_wishing_list():
@@ -78,6 +66,22 @@ def read_wishing_list():
             distro_to_watch.append(line.rstrip())
     return distro_to_watch
 
+
+############################### Torrent ##################################
+def add_to_watch_folder(torrentList, watchDir):
+    for j in torrentList:
+        myfile = requests.get(j.get("link"), allow_redirects=True)
+        path = watchDir + j.get("name")
+        open(path, 'wb').write(myfile.content)
+        logging.info("Add %s to download" % j.get("name")) 
+
+def routine(feed, watchDir):
+    wishing_list = read_wishing_list()
+    torrents = search_distro(feed, wishing_list)
+    add_to_watch_folder(torrents, watchDir)
+
+
+############################# Read Config ################################
 def read_arg_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action='version', version='%(prog)s 1.0')
@@ -96,15 +100,16 @@ def read_config_ini():
 
     return url, watchDir
 
-def main():
 
+################################# MAIN ###################################
+def main():
+    # Start application
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
 
     update_frequency = read_arg_parameters()
     last_modified = 'none'
     url, watchDir = read_config_ini()
-
-    # Start application
+    
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     while True:
         distro_feed = check_updates(url,last_modified)
