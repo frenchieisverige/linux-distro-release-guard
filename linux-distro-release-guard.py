@@ -7,7 +7,8 @@ import configparser
 from shutil import copyfile
 from datetime import datetime  
 from datetime import timedelta
-from time import sleep  
+from time import sleep
+import json  
 # Libraries installed via pip
 import feedparser
 import requests
@@ -96,6 +97,15 @@ def read_config_ini():
 
     return url, watchDir
 
+def read_config():
+    with open('./config/config.json', 'r') as f:
+        config = json.load(f)
+
+    url = config['url']
+    watchDir = config['watchDir']
+    return url, watchDir
+
+
 
 ################################# MAIN ###################################
 def main():
@@ -104,7 +114,7 @@ def main():
 
     update_frequency = read_arg_parameters()
     last_modified = 'none'
-    url, watchDir = read_config_ini()
+    url, watchDir = read_config()
     
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     
