@@ -27,5 +27,5 @@ COPY . .
 RUN mkdir ./torrents
 
 # Start script
-CMD [ "sh", "-c", "python ./linux-distro-release-guard.py -u $update_rate" ]
+CMD [ "sh", "-c", "python ./main.py -u $update_rate" ]
 
