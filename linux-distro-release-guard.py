@@ -14,17 +14,52 @@ import feedparser
 import requests
 
 ############################## XML Feed ##################################
-def get_feed(url, l_m='none'):
-    if l_m == 'none':
+def get_feed(url, last_modified='none'):
+    """Retrieves the "Latest torrents for source software releases", in other
+        words, the latest linux distribution releases.
+
+    Args:
+        url (str): A URL where the feed should be fetch of.
+        last_modified (str): A date telling when the last 
+            modification in the feed has been performed.
+            The first time last_modified is unknown.
+
+    Returns:
+        A dict (feedparser.FeedParserDict) containing feed information as
+        well as the last releases. 
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
+    if last_modified == 'none':
         logging.info('Get xml feed with no last_modified')
         return feedparser.parse(url)
     else:
-        logging.info("Get xml feed with last_modified %s" % l_m)
-        return feedparser.parse(url, modified=l_m)
+        logging.info("Get xml feed with last_modified %s" % last_modified)
+        return feedparser.parse(url, modified=last_modified)
+
 
 def check_updates(url, last_modified):
+    """Check if the feed has been updated given a date. Inform as well the 
+        status of the current feed.
+
+    Args:
+        url (str): A URL where the feed should be fetch of.
+        last_modified (str): A date telling when the last 
+            modification in the feed has been performed.
+            The first time last_modified is unknown.
+
+    Returns:
+        A dict (feedparser.FeedParserDict) containing feed information as
+        well as the last releases. 
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     logging.info("Check new releases on %s" % last_modified)
-    feed = get_feed(url, l_m=last_modified)
+    feed = get_feed(url, last_modified=last_modified)
 
     if feed.status == 200:   
         return feed
@@ -43,6 +78,22 @@ def check_updates(url, last_modified):
 
 ############################# Distribution ###############################
 def search_distro(feed, wishing_list):
+    """Search if the distribution on the wishing list is in the current
+        feed.
+
+    Args:
+        feed (dict): A feed which has been previously fetched.
+        wishing_list (list): An array containing the wishedlinux distributions
+            of the user.
+
+    Returns:
+        A list containing a dict per linux distribution. The dict is containing
+        the link and name of the distribution. 
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     distro_list = []
     for i in range(len(feed.entries)):
         for j in wishing_list:  
@@ -51,11 +102,26 @@ def search_distro(feed, wishing_list):
                     distro_list.append({"name": feed.entries[i].title, "link": feed.entries[i].link})
     return distro_list
 
-# rstrip removes /n lines
+
 def read_wishing_list():
+    """Read the wishing list from a txt file stored locally.
+
+    Args:
+        none
+
+    Returns:
+        A list containing a nested list per linux distribution. 
+        This nested list contains the name and the flavour of 
+        the linux distribution.
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     distro_to_watch = []
     file = open("./config/distro-list.txt", "r")
     for line in file:
+        # rstrip: removes /n lines
         if "-" in line:
             distro_to_watch.append(line.rstrip().split("-"))
         elif line.startswith('#') or line in ['\n', '\r\n']:
@@ -67,6 +133,21 @@ def read_wishing_list():
 
 ############################### Torrent ##################################
 def add_to_watch_folder(torrentList, watchDir):
+    """Download the torrent file and copy it to the watch folder of the 
+        bitTorrent client.
+
+    Args:
+        torrentList (list): A list contaning link and name of the linux
+            distribution
+        watchDir (str): A path to the watch folder of the bitTorrent Client
+
+    Returns:
+        none
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     for j in torrentList:
         myfile = requests.get(j.get("link"), allow_redirects=True)
         path = watchDir + j.get("name")
@@ -74,12 +155,39 @@ def add_to_watch_folder(torrentList, watchDir):
         logging.info("Add %s to download" % j.get("name")) 
 
 def routine(feed, wishing_list, watchDir):
+    """ A routine that is executed when a new distribution has been found.
+
+    Args:
+        feed (dict): A feed which has been previously fetched.
+        wishing_list (list): An array containing the wishedlinux distributions
+            of the user.
+        watchDir (str): A path to the watch folder of the bitTorrent Client
+
+    Returns:
+        None
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     torrents = search_distro(feed, wishing_list)
     add_to_watch_folder(torrents, watchDir)
 
 
 ############################# Read Config ################################
 def read_arg_parameters():
+    """Read arguments given as sysargs.
+
+    Args:
+        none
+
+    Returns:
+        A int containing the update frequency.
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action='version', version='%(prog)s 1.0')
     parser.add_argument("-u", "--update-frequency", help="how often the script should check new releases (in hours)")
@@ -89,6 +197,19 @@ def read_arg_parameters():
         return int(args.update_frequency)*3600
 
 def read_config():
+    """Read the configuration file from the dik.
+
+    Args:
+        none
+
+    Returns:
+        A tuple (str, str) containing the url and the watch directory of the 
+        bitTorrent Client.
+
+    Raises:
+        TODO
+        IOError: An error fetching the feed.
+    """
     with open('./config/config.json', 'r') as f:
         config = json.load(f)
 
