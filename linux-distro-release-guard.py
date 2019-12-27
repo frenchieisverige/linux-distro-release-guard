@@ -88,15 +88,6 @@ def read_arg_parameters():
     if args.update_frequency:
         return int(args.update_frequency)*3600
 
-def read_config_ini():
-    config = configparser.ConfigParser()
-    config.read('./config/config.ini')
-    
-    url = config['distrowatch.com']['url']
-    watchDir = config['bitTorrentClient']['watchDir']
-
-    return url, watchDir
-
 def read_config():
     with open('./config/config.json', 'r') as f:
         config = json.load(f)
