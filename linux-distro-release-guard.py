@@ -65,10 +65,8 @@ def check_updates(url, last_modified):
         return feed
     elif feed.status == 301:
         logging.warning("Redirected premanently to %s" %feed.href)
-        return
     elif feed.status == 304:
         logging.info(feed.debug_message)
-        return
     elif feed.status == 401:
         logging.error("Feed does not exist anymore")
         exit(1)
@@ -188,13 +186,22 @@ def read_arg_parameters():
         TODO
         IOError: An error fetching the feed.
     """
-    parser = argparse.ArgumentParser()
+    description= ('Watch automatically your favourite Linux distribution' 
+                    'release and send it to your BitTorrent client in order' 
+                    'to download it!')
+    parser = argparse.ArgumentParser(description)
     parser.add_argument("-v", "--version", action='version', version='%(prog)s 1.0')
     parser.add_argument("-u", "--update-frequency", help="how often the script should check new releases (in hours)")
+    parser.add_argument("-s", "--site", help="the url where the feed should be pulled from")
+    parser.add_argument("-d", "--directory", help="the watch directory of the bitTorrent client")
     args = parser.parse_args()
 
     if args.update_frequency:
-        return int(args.update_frequency)*3600
+        update_config("updateFrequency", int(args.update_frequency))
+    if args.site:
+        update_config("url", args.site)
+    if args.directory:
+        update_config("watchDir", args.directory)
 
 def read_config():
     """Read the configuration file from the dik.
@@ -210,12 +217,20 @@ def read_config():
         TODO
         IOError: An error fetching the feed.
     """
-    with open('./config/config.json', 'r') as f:
-        config = json.load(f)
+    with open('./config/config.json', 'r') as configFile:
+        config = json.load(configFile)
 
     url = config['url']
     watchDir = config['watchDir']
-    return url, watchDir
+    update_frequency = config['updateFrequency']*3600
+    return url, watchDir, update_frequency
+
+def update_config(key, value):
+    with open("./config/config.json", "r") as configFile:
+        config = json.load(configFile)
+    config[key] = value
+    with open("./config/config.json", "w") as configFile:
+        json.dump(config, configFile)
 
 
 ################################# MAIN ###################################
@@ -223,18 +238,19 @@ def main():
     # Start application
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
 
-    update_frequency = read_arg_parameters()
+    read_arg_parameters()
     last_modified = 'none'
-    url, watchDir = read_config()
+    url, watchDir,update_frequency = read_config()
     
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     
     while True:
         distro_feed = check_updates(url,last_modified)
         wishing_list = read_wishing_list()
-        routine(distro_feed, wishing_list, watchDir)
-        # Update last_modified
-        last_modified = distro_feed.modified
+        if distro_feed:
+            routine(distro_feed, wishing_list, watchDir)
+            # Update last_modified
+            last_modified = distro_feed.modified
         logging.info("Next check at %s" % (datetime.now() + timedelta(seconds=update_frequency)))
         sleep(update_frequency)
     
