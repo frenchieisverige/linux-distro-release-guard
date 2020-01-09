@@ -3,6 +3,7 @@ import logging
 # Libraries installed via pip
 import feedparser
 
+
 def get_feed(url, last_modified='none'):
     """Retrieves the "Latest torrents for source software releases", in other
         words, the latest linux distribution releases.
@@ -27,6 +28,7 @@ def get_feed(url, last_modified='none'):
     else:
         logging.info("Get xml feed with last_modified %s" % last_modified)
         return feedparser.parse(url, modified=last_modified)
+
 
 
 def check_updates(url, last_modified):

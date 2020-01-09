@@ -1,6 +1,7 @@
 import argparse
 import json
 
+
 def read_arg_parameters():
     """Read arguments given as sysargs.
 
@@ -30,6 +31,8 @@ def read_arg_parameters():
         update_config("url", args.site)
     if args.directory:
         update_config("watchDir", args.directory)
+
+
 
 def read_config():
     """Read the configuration file from the dik.

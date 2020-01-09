@@ -4,6 +4,7 @@ import requests
 # Module
 from distribution import search_distro
 
+
 def add_to_watch_folder(torrentList, watchDir):
     """Download the torrent file and copy it to the watch folder of the 
         bitTorrent client.
@@ -25,6 +26,8 @@ def add_to_watch_folder(torrentList, watchDir):
         path = watchDir + j.get("name")
         open(path, 'wb').write(myfile.content)
         logging.info("Add %s to download" % j.get("name")) 
+
+
 
 def routine(feed, wishing_list, watchDir):
     """ A routine that is executed when a new distribution has been found.

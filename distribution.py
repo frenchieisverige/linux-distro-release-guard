@@ -24,6 +24,7 @@ def search_distro(feed, wishing_list):
     return distro_list
 
 
+
 def read_wishing_list():
     """Read the wishing list from a txt file stored locally.
 
