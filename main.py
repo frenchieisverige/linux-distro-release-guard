@@ -16,7 +16,7 @@ def main():
 
     read_arg_parameters()
     last_modified = 'none'
-    url, watchDir,update_frequency = read_config()
+    url, watchDir, update_frequency = read_config()
     
     logging.info("Starting application with update frequency: %s seconds" % update_frequency)
     
