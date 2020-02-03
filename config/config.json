@@ -1,7 +1,8 @@
 {
     "updateFrequency": 6, 
     "url": "https://distrowatch.com/news/torrents.xml",
-    "watchDir": "/torrents/"
+    "watchDir": "/torrents/",
+    "listPath": "/config/"
 }
 
 
